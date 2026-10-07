@@ -190,27 +190,111 @@ function resqLogin() {
 
 
 // ==========================================
-// SOS BUTTON
+// SOS EMERGENCY REQUEST
 // ==========================================
 
 function sendSOS() {
 
+    const user = auth.currentUser;
+
+    // Check if user is logged in
+    if (!user) {
+        alert("Please login before sending an SOS.");
+        return;
+    }
+
     const confirmation = confirm(
-        "Are you sure you want to send an emergency SOS?"
+        "🚨 EMERGENCY SOS\n\n" +
+        "Are you sure you want to send an emergency request?"
     );
 
-    if (confirmation) {
-
-        alert(
-            "🚨 SOS REQUEST CREATED!\n\n" +
-            "The emergency request will be connected to the RESQ cloud database."
-        );
-
-        console.log("SOS request created.");
-
-    } else {
-
+    if (!confirmation) {
         alert("SOS request cancelled.");
-
+        return;
     }
+
+    // Get user's location
+    if (!navigator.geolocation) {
+
+        saveSOSRequest(null, null);
+
+        return;
+    }
+
+    navigator.geolocation.getCurrentPosition(
+
+        function(position) {
+
+            const latitude = position.coords.latitude;
+            const longitude = position.coords.longitude;
+
+            saveSOSRequest(latitude, longitude);
+
+        },
+
+        function(error) {
+
+            console.log("Location unavailable:", error);
+
+            // Still create the SOS request
+            saveSOSRequest(null, null);
+
+        }
+    );
+}
+
+
+// ==========================================
+// SAVE SOS REQUEST TO FIRESTORE
+// ==========================================
+
+function saveSOSRequest(latitude, longitude) {
+
+    const user = auth.currentUser;
+
+    if (!user) {
+        alert("Please login before sending an SOS.");
+        return;
+    }
+
+    db.collection("sos_requests")
+        .add({
+
+            userId: user.uid,
+
+            email: user.email,
+
+            latitude: latitude,
+
+            longitude: longitude,
+
+            status: "pending",
+
+            message: "Emergency SOS request",
+
+            createdAt: firebase.firestore.FieldValue.serverTimestamp()
+
+        })
+
+        .then(function(docRef) {
+
+            console.log("SOS request created:", docRef.id);
+
+            alert(
+                "🚨 SOS REQUEST SENT SUCCESSFULLY!\n\n" +
+                "Your emergency request has been saved to the RESQ cloud database."
+            );
+
+        })
+
+        .catch(function(error) {
+
+            console.error("SOS error:", error);
+
+            alert(
+                "SOS request failed: " +
+                error.message
+            );
+
+        });
 }
