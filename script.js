@@ -4,7 +4,7 @@
 // ==========================================
 
 const firebaseConfig = {
-    apiKey: "AIzaSyDJCBEip8GAyoArYPZmhLmbBxPYf72Ecw",
+    apiKey: "AIzaSyDJCBEip8GAyoArYPZmhLmbBxxPYf72Ecw",
     authDomain: "resq-safety-system.firebaseapp.com",
     projectId: "resq-safety-system",
     storageBucket: "resq-safety-system.firebasestorage.app",
